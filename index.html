@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BitterBot // Booting Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: black;
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+      color: #00fff2;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    #overlay {
+      position: relative;
+      z-index: 2;
+      padding: 2vw;
+      height: 100vh;
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      backdrop-filter: blur(5px);
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    #bootText {
+      font-size: 1rem;
+      white-space: pre-wrap;
+      color: #00fff2;
+      text-shadow: 0 0 5px #00ffff;
+    }
+
+    #loaderBox {
+      margin-top: 2vh;
+      padding: 1.2rem;
+      border: 1px solid #00ffee;
+      background: rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 10px #00ffee;
+      border-radius: 10px;
+      width: 60vw;
+      color: #00ffee;
+      font-size: 1rem;
+    }
+
+    #beginBtn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 1rem 2rem;
+      background: #00ffe5;
+      color: black;
+      border: none;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 5;
+      box-shadow: 0 0 20px #00fff2;
+    }
+
+    #beginBtn:hover {
+      background: #0ff;
+      box-shadow: 0 0 30px #0ff;
+    }
+
+    .rainbow {
+      background: linear-gradient(90deg, #f0f, #0ff, #00f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: hue 3s infinite linear;
+    }
+
+    @keyframes hue {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+
+    #transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #00fff2;
+      opacity: 0;
+      z-index: 999;
+      transition: opacity 1.2s ease-in-out;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<button id="beginBtn">🤖 INITIATE BITTERBOT</button>
+
+<div id="overlay">
+  <div id="bootText"></div>
+  <div id="loaderBox">
+    <div class="rainbow">:: BitterBot will activate in <span id="countdown">4</span> seconds...</div>
+    <div id="logDump" style="margin-top: 10px;"></div>
+  </div>
+</div>
+
+<div id="transition"></div>
+
+<audio id="cyberBeep" src="assets/cyber-beep.mp3" preload="auto"></audio>
+<audio id="cyberAlarm" src="assets/cyber-alarm.mp3" preload="auto"></audio>
+
+<script>
+  // Matrix rain
+  const canvas = document.getElementById("matrix");
+  const ctx = canvas.getContext("2d");
+  let width, height;
+  const fontSize = 16;
+  let columns, drops;
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    columns = Math.floor(width / fontSize);
+    drops = Array(columns).fill(1);
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+
+  const codeChars = "01{}[]()<>=+-*/&|%!~^#ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "#00fff2";
+    ctx.font = fontSize + "px monospace";
+    drops.forEach((y, i) => {
+      const text = codeChars[Math.floor(Math.random() * codeChars.length)];
+      ctx.fillText(text, i * fontSize, y * fontSize);
+      if (y * fontSize > height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    });
+  }
+  setInterval(drawMatrix, 33);
+
+  // Boot script
+  const bootText = document.getElementById("bootText");
+  const logDump = document.getElementById("logDump");
+  const countdown = document.getElementById("countdown");
+  const cyberBeep = document.getElementById("cyberBeep");
+  const cyberAlarm = document.getElementById("cyberAlarm");
+  const overlay = document.getElementById("overlay");
+  const beginBtn = document.getElementById("beginBtn");
+  const transition = document.getElementById("transition");
+
+  const bootLines = [
+    "Initializing BitterBot...",
+    "Loading Bot Engine v2.4...",
+    "Fetching targeting protocols...",
+    "Calibrating site-ping modules...",
+    "Injecting spoof headers...",
+    "Encrypting crawler identity...",
+    "All subsystems green.",
+    "BitterBot Core Ready."
+  ];
+
+  beginBtn.addEventListener("click", () => {
+    beginBtn.style.display = "none";
+    overlay.style.display = "flex";
+    cyberAlarm.play();
+    runBootSequence();
+  });
+
+  function runBootSequence() {
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index < bootLines.length) {
+        bootText.textContent += `> ${bootLines[index]}\n`;
+        cyberBeep.currentTime = 0;
+        cyberBeep.play();
+        index++;
+      } else {
+        clearInterval(interval);
+        startFinalPhase();
+      }
+    }, 350); // Faster
+  }
+
+  function startFinalPhase() {
+    let count = 4;
+    const fakeLogs = [
+      "[✓] Bot Engine Stable",
+      "[✓] Ping Function Online",
+      "[✓] DOM Scanner Optimized",
+      "[✓] Spoof Mode Enabled",
+      "[✓] Bot ID Masked",
+      "[✓] Injection Parameters Ready"
+    ];
+
+    const countInterval = setInterval(() => {
+      if (count > 0) {
+        countdown.textContent = count;
+        const log = document.createElement("div");
+        log.textContent = fakeLogs[Math.floor(Math.random() * fakeLogs.length)];
+        logDump.appendChild(log);
+        cyberBeep.currentTime = 0;
+        cyberBeep.play();
+        count--;
+      } else {
+        clearInterval(countInterval);
+        transition.style.opacity = "1";
+        setTimeout(() => {
+          window.location.href = "bitterbot.html";
+        }, 1200);
+      }
+    }, 1000);
+  }
+</script>
+
+</body>
+</html>
