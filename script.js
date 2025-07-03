@@ -5,7 +5,8 @@ const statusText = document.getElementById("status");
 const logOutput = document.getElementById("logOutput");
 
 // 🌐 Set this to your deployed backend later
-const API_URL = "http://localhost:3000/api/start"; // 🔁 Change to Render URL when deployed
+
+const API_URL = "https://bitterbot-backend.onrender.com/api/start";
 
 startBtn.addEventListener("click", () => {
   const url = urlInput.value.trim();
